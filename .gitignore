@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Base de datos (si usaras SQLite, pero usamos Docker así que bien)
+*.sqlite3
+
+# Logs
+*.log
