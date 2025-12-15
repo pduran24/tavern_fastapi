@@ -20,13 +20,11 @@ def create_product(db: Session, product: schemas.ProductCreate):
     return db_product
 
 
-def get_products(db: Session, limit: int):
+def get_products(db: Session, limit: int = 100, skip: int = 0):
     """
     Devuelve una lista de todos los productos dentro del límite introducido
     """
-    if limit == 0:
-        return db.query(models.Product).all()
-    return db.query(models.Product).limit(limit).all()
+    return db.query(models.Product).offset(skip).limit(limit).all()
 
 def get_product_by_id(db: Session, product_id: int):
     """
