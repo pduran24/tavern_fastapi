@@ -130,7 +130,11 @@ def main(page: ft.Page):
                 products_grid.controls.clear()
 
                 for prod in productos:
-                    icono = ft.Icons.LOCAL_DRINK if prod['category'] == "bebida" else ft.Icons.BAKERY_DINING
+                    icono = "🍻"
+                    if prod['category'] == "Comida":
+                        icono = "🍗"
+                    elif prod['category'] == "Otros":
+                        icono = "🧭"
                     
                     tarjeta = ft.Container(
                         bgcolor=ft.Colors.BLACK,
@@ -141,9 +145,21 @@ def main(page: ft.Page):
                             
                             content=ft.Column(
                                 controls=[
-                                    ft.Icon(icono, size=40, color=ft.Colors.AMBER),
-                                    ft.Text(prod['name'], size=16, weight="bold", no_wrap=True, text_align="center"), 
-                                    ft.Text(prod['description'] or "Sin descripción", size=12, text_align="center", color=ft.Colors.ON_SURFACE_VARIANT),
+                                    ft.Text(prod['name'], size=16, weight="bold", text_align="center", color=ft.Colors.GREEN_ACCENT),
+                                    ft.Text(prod['category'], size=12),
+
+                                    ft.Container(
+                                        content=ft.Column(
+                                            controls=[
+                                                ft.Text(icono, size=40, color=ft.Colors.AMBER),
+                                                ft.Text(prod['description'], size=12, text_align="center", color=ft.Colors.ON_SURFACE_VARIANT),
+                                            ],
+                                            alignment=ft.MainAxisAlignment.CENTER,
+                                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                                        ),
+                                        expand=True
+                                    ),
+    
                                     ft.Divider(height=10, color="transparent"), # Espacio invisible
                                     ft.Row(
                                         [
