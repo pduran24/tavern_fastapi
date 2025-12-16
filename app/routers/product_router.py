@@ -17,7 +17,7 @@ get_db = database.get_db
 # ---------------------------
 # GET ALL
 @router.get("/", response_model=List[schemas.ProductResponse])
-def get_products(db: Session = Depends(get_db), limit: int = 100, skip: int = 0):
+def get_products(db: Session = Depends(get_db), limit: int = 1000, skip: int = 0):
     products = product_crud.get_products(db, limit, skip)
     return products
 
