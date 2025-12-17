@@ -29,7 +29,7 @@ class Product(Base):
     stock = Column(Integer, default=0)
     category = Column(Enum(ProductType), default=ProductType.BEBIDA, index=True)
 
-class Orders(Base):
+class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
