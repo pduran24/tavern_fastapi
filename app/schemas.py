@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from .models import ProductType
 from typing import Optional
+from datetime import datetime
 
 # ------------CLIENTES------------
 # 1. Cliente base -> campos compartidos comunes (para crear y leer)
@@ -42,4 +43,17 @@ class TransactionCreate(BaseModel):
     client_id: int
     product_id: int
     quantity: int = 1
+
+
+# ------------HISTORIAL TRANSACCIONES------------
+class OrderResponse(BaseModel):
+    id: int
+    client_id: int
+    product_id: int
+    quantity: int
+    total_price: float
+    timestamp = datetime
+
+    class Config:
+        from_attributes= True
 
