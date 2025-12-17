@@ -65,3 +65,12 @@ class ClienteRecharge(BaseModel):
 class ProductRecharge(BaseModel):
     amount: int
 
+# ------------IA------------
+class ChatRequest(BaseModel):
+    message: str
+
+class ChatResponse(BaseModel):
+    response: str
+
+
+
