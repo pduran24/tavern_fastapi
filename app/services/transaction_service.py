@@ -27,6 +27,15 @@ def process_purchase(db: Session, transaction: schemas.TransactionCreate):
     db_product.stock -= transaction.quantity
     db_client.cash -= total_price
 
+    # Guardar la venta en el historial (Orders)
+    new_order = models.Order(
+        client_id=transaction.client_id,
+        product_id=transaction.product_id,
+        quantity=transaction.quantity,
+        total_price=total_price
+    )
+    db.add(new_order)
+
     # Persistencia
     db.add(db_product)
     db.add(db_client)
