@@ -57,3 +57,11 @@ class OrderResponse(BaseModel):
     class Config:
         from_attributes= True
 
+
+# ------------RELOAD------------
+class ClienteRecharge(BaseModel):
+    amount: float
+
+class ProductRecharge(BaseModel):
+    amount: int
+

@@ -41,3 +41,15 @@ def delete_client(db: Session, client_id: int):
         return True
     
     return False
+
+def add_cash(db: Session, client_id: int, amount: float):
+    db_client = get_client_by_id(db, client_id)
+
+    if not db_client:
+        return None
+    
+    db_client.cash += amount
+    db.commit()
+    db.refresh(db_client)
+
+    return db_client

@@ -43,3 +43,11 @@ def delete_client(client_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     return None
 
+@router.put("/{client_id}/recharge", response_model=schemas.ClientResponse)
+def recharge_client(client_id: int, recharge: schemas.ClienteRecharge, db: Session = Depends(get_db)):
+    client = client_crud.add_cash(db, client_id, recharge.amount)
+    if client is None:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    return client
+
+
