@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from .models import ProductType
 from typing import Optional
 
-
+# ------------CLIENTES------------
 # 1. Cliente base -> campos compartidos comunes (para crear y leer)
 class ClientBase(BaseModel):
     name: str
@@ -21,7 +21,7 @@ class ClientResponse(ClientBase):
     class Config:
         from_attributes = True
         
-
+# ------------PRODUCTOS------------
 class ProductBase(BaseModel):
     name: str
     description: Optional[str]
@@ -36,4 +36,10 @@ class ProductResponse(ProductBase):
     id: int
     class Config:
         from_attributes = True
+
+# ------------TRANSACCIONES------------
+class TransactionCreate(BaseModel):
+    client_id: int
+    product_id: int
+    quantity: int = 1
 
