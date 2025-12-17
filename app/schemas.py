@@ -52,7 +52,7 @@ class OrderResponse(BaseModel):
     product_id: int
     quantity: int
     total_price: float
-    timestamp = datetime
+    timestamp: datetime
 
     class Config:
         from_attributes= True
