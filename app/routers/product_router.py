@@ -54,3 +54,11 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     return None
+
+@router.put("/{product_id}/recharge", response_model=schemas.ProductResponse)
+def recharge_product(product_id: int, recharge: schemas.ProductRecharge, db: Session = Depends(get_db)):
+    product = product_crud.add_amount(db, product_id, recharge.amount)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return product
+

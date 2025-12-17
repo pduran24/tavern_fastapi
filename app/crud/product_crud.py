@@ -75,3 +75,15 @@ def delete_product(db: Session, product_id: int):
         return True
     
     return False
+
+def add_amount(db: Session, product_id: int, amount: int):
+    db_product = get_product_by_id(db, product_id)
+
+    if not db_product:
+        return None
+    
+    db_product.stock += amount
+    db.commit()
+    db.refresh(db_product)
+
+    return db_product
