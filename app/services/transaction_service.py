@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from .. import models, schemas
-from crud import client_crud, product_crud
+from ..crud import client_crud, product_crud
 
 
 def process_purchase(db: Session, transaction: schemas.TransactionCreate):
@@ -16,7 +16,7 @@ def process_purchase(db: Session, transaction: schemas.TransactionCreate):
     
     # Stock
     if db_product.stock < transaction.quantity:
-        raise HTTPException(status_code=400, detail=f"No hay suficiente stock (máximo {db_product.stock} )")
+        raise HTTPException(status_code=400, detail=f"No hay suficiente stock (máximo {db_product.stock})")
     
     # Dinero
     total_price = transaction.quantity * db_product.price

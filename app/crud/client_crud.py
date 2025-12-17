@@ -10,7 +10,7 @@ def create_client(db: Session, client: schemas.ClientCreate):
     return db_client
 
 def get_clients(db: Session, limit: int = 100, skip: int = 0):
-    return db.query(models.Client).offset(skip).limit(limit).all()
+    return db.query(models.Client).order_by(models.Client.id).offset(skip).limit(limit).all()
 
 def get_client_by_id(db: Session, client_id: int):
     return db.query(models.Client).filter(models.Client.id == client_id) .first()
