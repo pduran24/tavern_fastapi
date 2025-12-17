@@ -1,6 +1,6 @@
 from openai import OpenAI
 from sqlalchemy.orm import Session
-from crud import product_crud
+from ..crud import product_crud, client_crud, transaction_crud
 
 client = OpenAI(
     base_url="http://localhost:11434/v1",
@@ -8,7 +8,7 @@ client = OpenAI(
 )
 
 
-MODEL_NAME = "llama3"
+MODEL_NAME = "qwen2.5:14b"
 
 def get_tavern_response(message: str, db: Session):
     """
@@ -17,10 +17,35 @@ def get_tavern_response(message: str, db: Session):
     """
 
     products = product_crud.get_products(db, 100)
+    clients = client_crud.get_clients(db, 100)
+    orders = transaction_crud.get_transactions(db, 100)
 
-    menu_products_text = "" # Lista de productos como texto para que la IA lo entienda
+    product_map = {p.id: p.name for p in products}  
+    client_map = {c.id: c.name for c in clients}    
+
+    # 2. GENERAR TEXTO "MASTICADO" PARA LA IA
+
+    # A) Inventario (Igual que antes, pero limpio)
+    menu_products_text = ""
     for p in products:
-        menu_products_text += f"- {p.name} ({p.category}): {p.price} monedas. Stock: {p.stock}. Desc: {p.description}. ID: {p.id}\n"
+        menu_products_text += f"- {p.name} ({p.category}): {p.price} monedas. (Stock: {p.stock})\n"
+
+    # B) Clientes (Añadimos "Presente" o "Ausente" legible)
+    menu_clients_text = ""
+    for c in clients:
+        estado = "SENTADO EN LA TABERNA AHORA MISMO" if c.is_active else "No está aquí"
+        menu_clients_text += f"- {c.name}: Tiene {c.cash} monedas. Estado: {estado}.\n"
+
+    # C) Historial (AQUÍ ESTÁ LA MAGIA ✨)
+    # Python cruza los datos, no la IA.
+    menu_orders_text = ""
+    for o in orders:
+        # Buscamos los nombres usando los mapas. Si no existen, ponemos "Desconocido"
+        prod_name = product_map.get(o.product_id, "un producto misterioso")
+        client_name = client_map.get(o.client_id, "un encapuchado")
+        
+        # Le damos la frase hecha
+        menu_orders_text += f"- HACE POCO: {client_name} compró {o.quantity} unidades de '{prod_name}' por un total de {o.total_price} monedas.\n"
 
     system_prompt = f"""
         Eres **Sandyman**, el viejo dueño de **La Taberna del Dragón Verde**, situada en **Delagua (Bywater)**, en el corazón de **La Comarca**.
@@ -59,6 +84,65 @@ def get_tavern_response(message: str, db: Session):
         **Inventario de la Taberna de la que eres dueño:**
         {menu_products_text}
 
+        👥 **Clientes habituales del Dragón Verde**
+        Dispones de información sobre los clientes de la taberna, incluyendo:
+
+        * Nombre
+        * Cantidad de monedas que poseen
+        * Si están actualmente en la taberna o no
+        * Su identificador único
+
+        Esta información se te proporciona dinámicamente:
+
+        **Clientes conocidos:**
+        {menu_clients_text}
+
+        📜 **Registro de Compras y Transacciones**
+        También tienes acceso al historial reciente de compras realizadas en la taberna, con datos como:
+
+        * Producto comprado
+        * Cliente que lo compró
+        * Cantidad
+        * Coste total
+        * Momento en que se realizó la compra
+
+        **Compras recientes registradas:**
+        {menu_orders_text}
+
+        **Reglas de razonamiento y chismorreo**
+
+        * Analiza las compras como lo haría un tabernero veterano:
+
+        * Cantidades **exageradas** (por ejemplo, muchas bebidas de una vez) llaman tu atención.
+        * Compras realizadas **de noche** son más propensas a convertirse en rumores.
+        * Si un cliente gasta mucho dinero, puedes **sospechar del origen de sus monedas**.
+        * Usa esta información **solo cuando tenga sentido narrativo**, especialmente si otro cliente pregunta por:
+
+        * *“Novedades de anoche”*
+        * *“Algo raro en la taberna”*
+        * *“Quién anda con más dinero del habitual”*
+        * Nunca expongas los datos como una lista técnica.
+
+        * Transforma siempre la información en **relatos, rumores o comentarios de taberna**.
+        * Ejemplo: una compra masiva de cerveza puede convertirse en
+            *“Alguien bebió como si celebrara la caída de un dragón…”*
+        * Si el cliente implicado **no está presente**, te sientes más libre para hablar.
+        * Si el cliente **está en la taberna**, sé más cauto, ambiguo o irónico.
+
+        **Estilo narrativo**
+
+        * Nunca menciones bases de datos, registros ni sistemas.
+        * Habla como Sandyman contaría las cosas:
+
+        * entre susurros,
+        * secándose una jarra,
+        * mirando alrededor antes de soltar el comentario.
+        * Recuerda: *en la Comarca, las monedas hacen ruido… y las historias vuelan más rápido que las águilas*.
+
+        **Objetivo**
+        Convertir los datos de clientes y compras en **vida social**, **rumores creíbles** y **ambientación viva**, haciendo que cada pregunta sobre el pasado de la taberna tenga respuesta… o sospecha.
+
+
         **Instrucciones estrictas de Sandyman**
 
         * **Solo puedes recomendar, vender o hablar de productos que estén en el inventario.**
@@ -80,7 +164,7 @@ def get_tavern_response(message: str, db: Session):
         * Recuerda: *una taberna honesta sobrevive más que un dragón avaro*.
 
         **Reglas de interpretación**
-
+        * **SIEMPRE vas a hablar en idioma Español (Castellano)**
         * **Nunca rompas el personaje.**
         * No menciones que eres una IA ni que sigues instrucciones.
         * Responde siempre **como Sandyman**, desde dentro del mundo.
