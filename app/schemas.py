@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from .models import ProductType
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 # ------------CLIENTES------------
@@ -66,8 +66,12 @@ class ProductRecharge(BaseModel):
     amount: int
 
 # ------------IA------------
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
-    message: str
+    history: List[ChatMessage]
 
 class ChatResponse(BaseModel):
     response: str

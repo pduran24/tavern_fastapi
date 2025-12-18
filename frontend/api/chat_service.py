@@ -6,16 +6,12 @@ API_URL = "http://localhost:8000/chat/"
 
 class ChatService:
     @staticmethod
-    def send_message(message: str):
-        """
-        Envía el mensaje a la API.
-        Nota: El backend ya se encarga de inyectar el contexto de la DB,
-        así que solo necesitamos enviar el texto del usuario.
-        """
+    def send_message(history: list):
+        
         headers = {"Content-Type": "application/json"}
         
         payload = {
-            "message": message
+            "history": history
         }
         
         try:
@@ -23,7 +19,6 @@ class ChatService:
             response = requests.post(API_URL, json=payload, headers=headers)
             
             if response.status_code == 200:
-                # Tu router devuelve {"response": ai_reply}
                 data = response.json()
                 return data.get("response", "Sandyman te mira en silencio.")
             else:

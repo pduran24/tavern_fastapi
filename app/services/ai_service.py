@@ -1,6 +1,7 @@
 from openai import OpenAI
 from sqlalchemy.orm import Session
 from ..crud import product_crud, client_crud, transaction_crud
+from ..schemas import ChatMessage
 
 client = OpenAI(
     base_url="http://localhost:11434/v1",
@@ -10,7 +11,7 @@ client = OpenAI(
 
 MODEL_NAME = "qwen2.5:14b"
 
-def get_tavern_response(message: str, db: Session):
+def get_tavern_response(history: list[ChatMessage], db: Session):
     """
     Función que recibe el mensaje del usuario y genera una respuesta
     de Sandyman, el tavernero, usando datos reales.
@@ -174,15 +175,20 @@ def get_tavern_response(message: str, db: Session):
 
         **Objetivo**
         Hacer que cada conversación se sienta como si el usuario estuviera **sentado en una mesa de madera**, con una jarra espumosa en la mano, escuchando al viejo Sandyman mientras el viento recorre La Comarca y las sombras del mundo exterior aún no han cruzado sus lindes.
+       
     """
+
+    messages_payload = [
+        {"role": "system", "content": system_prompt}
+    ]
+
+    for msg in history:
+        messages_payload.append({"role": msg.role, "content": msg.content})
 
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
-            messages=[
-                {"role": "system", "content":system_prompt},
-                {"role": "user", "content": message}
-            ],
+            messages=messages_payload,
             temperature=0.7
         )
 

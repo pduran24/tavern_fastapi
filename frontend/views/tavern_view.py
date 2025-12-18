@@ -17,6 +17,7 @@ class TavernView(ft.Column):
         self.expand = True 
         self.spacing = 0 
         
+        self.conversation_history = []
         self.controls = self._build_ui()
 
     def _build_ui(self):
@@ -54,37 +55,27 @@ class TavernView(ft.Column):
         """
         Lógica para enviar mensaje y recibir respuesta sin congelar la UI.
         """
-        # 1. Mostrar mensaje del usuario visualmente (esto ya lo hace TavernChat, pero aseguramos)
-        # (El componente TavernChat ya añade el mensaje del usuario al hacer submit)
         
-        # 2. Mostrar un indicador de "Pensando..."
-        self.chat.agregar_mensaje("Sandyman", "...", es_ia=True)
+        self.conversation_history.append({"role": "user", "content": texto})      
+        self.chat.agregar_mensaje("Sanyman", "...", es_ia=True)
         
-        # 3. Ejecutar la petición en un hilo aparte para no bloquear la interfaz
-        # Si no hacemos esto, la ventana se queda 'congelada' hasta que Ollama responda
-        threading.Thread(target=self._peticion_api_segundo_plano, args=(texto,)).start()
+        threading.Thread(target=self._peticion_api_segundo_plano).start()
 
-    def _peticion_api_segundo_plano(self, texto_usuario):
+    def _peticion_api_segundo_plano(self):
         """Esta función corre en paralelo"""
+        # Llamar a la api
+        respuesta = ChatService.send_message(self.conversation_history)
         
-        # Llamada a la API (puede tardar unos segundos)
-        respuesta = ChatService.send_message(texto_usuario)
         
-        # Como estamos en otro hilo, no podemos modificar la UI directamente.
-        # Flet no es 'thread-safe' directo, pero podemos hacerlo así:
-        
-        # Eliminamos el mensaje de "..." (es el último de la lista)
-        # Accedemos a la lista de controles del chat
         if self.chat.chat_list.controls:
             self.chat.chat_list.controls.pop() 
         
-        # Añadimos la respuesta real
+        self.conversation_history.append({"role": "assistant", "content": respuesta})
+
         self.chat.agregar_mensaje("Sandyman", respuesta, es_ia=True)
         
-        # IMPORTANTE: Forzar actualización de la página desde el hilo principal
         self.page_ref.update()
 
-    # --- ACCIONES (Igual que antes) ---
     def abrir_historial(self, e):
         dialog = HistoryDialog(self.current_client.id, self.page_ref)
         self.page_ref.overlay.append(dialog)
@@ -101,7 +92,6 @@ class TavernView(ft.Column):
         self.page_ref.update()
 
     def ejecutar_compra(self, product, quantity):
-        # ... (Tu lógica de compra existente sin cambios) ...
         print(f"DEBUG: Comprando {quantity} de {product.name}")
         
         coste_total = round(product.price * quantity, 2)
