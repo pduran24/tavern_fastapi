@@ -1,29 +1,43 @@
 import flet as ft
-from components.products_grid import ProductGrid
-from components.app_header import AppHeader
+from views.login_view import LoginView
+from views.tavern_view import TavernView
 
 def main(page: ft.Page):
-    page.title = "El Dragón Verde"
+    # --- CONFIGURACIÓN GLOBAL ---
+    page.title = "La Taberna del Dragón Verde"
     page.theme_mode = ft.ThemeMode.DARK
     page.padding = 0
-
-    page.floating_action_button = ft.FloatingActionButton(
-        icon=ft.Icons.REFRESH,
-        on_click=lambda _: grid_productos.cargar_datos()
-    )
-
-    header = AppHeader()
-    grid_productos = ProductGrid()
-
+    page.assets_dir = "assets"
     
-    layout = ft.Column(
-        expand=True,
-        controls=[
-            header,
-            grid_productos
-        ]
-    )
+    # --- ESTADO DE LA APP ---
+    current_client = None
 
-    page.add(layout)
+    # --- ENRUTAMIENTO / NAVEGACIÓN ---
+    
+    def ir_al_login(e=None):
+        """Limpia y carga la vista de Login"""
+        nonlocal current_client
+        current_client = None # reset cliente
+        
+        page.clean()
+        # instanciar la vista pasándole el callback de éxito
+        vista = LoginView(page, on_login_success=ir_a_taberna)
+        page.add(vista)
+        page.update()
 
-ft.app(main) 
+    def ir_a_taberna(cliente_seleccionado):
+        """Limpia y carga la vista de la Taberna"""
+        nonlocal current_client
+        current_client = cliente_seleccionado
+        
+        page.clean()
+        # instanciar la vista pasándole el cliente y el callback de salida
+        vista = TavernView(page, current_client, on_logout=ir_al_login)
+        page.add(vista)
+        page.update()
+
+    # --- INICIO ---
+    ir_al_login()
+
+if __name__ == "__main__":
+    ft.app(target=main)
