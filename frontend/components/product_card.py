@@ -23,9 +23,9 @@ class ProductCard(ft.Container):
         self.on_hover = self.animar_hover
         
         # Icono según categoría
-        icono = "🍺"
-        if self.product.category == "Comida": icono = "🍗"
-        elif self.product.category == "Otros": icono = "🎒"
+        icono = "beer_2.png"
+        if self.product.category == "Comida": icono = "bread.png"
+        elif self.product.category == "Otros": icono = "sword.png"
 
         # Definir color del stock
         color_stock = ft.Colors.GREY
@@ -40,8 +40,9 @@ class ProductCard(ft.Container):
                 ft.Column(
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=0,
+                    
                     controls=[
-                        ft.Text(icono, size=40),
+                        ft.Image(icono, width=40),
                         ft.Container(height=5),
                         ft.Text(
                             product.name, 
@@ -51,7 +52,8 @@ class ProductCard(ft.Container):
                             max_lines=2, 
                             overflow=ft.TextOverflow.ELLIPSIS
                         ),
-                    ]
+                    ],
+                    expand=True
                 ),
                 
                 # Parte inferior: Precio y Stock

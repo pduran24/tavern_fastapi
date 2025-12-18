@@ -1,9 +1,9 @@
 import flet as ft
-import time
 from components.app_header import AppHeader
 from components.products_grid import ProductGrid
 from components.product_dialog import ProductDetailDialog
-from components.history_dialog import HistoryDialog 
+from components.history_dialog import HistoryDialog
+from components.tavern_chat import TavernChat 
 from api.product_service import ProductService
 
 class TavernView(ft.Column):
@@ -12,7 +12,8 @@ class TavernView(ft.Column):
         self.page_ref = page
         self.current_client = current_client
         self.on_logout = on_logout
-        self.expand = True
+        self.expand = True 
+        self.spacing = 0 
         
         self.controls = self._build_ui()
 
@@ -24,15 +25,36 @@ class TavernView(ft.Column):
             page_ref=self.page_ref
         )
         
+        
         self.grid = ProductGrid(on_card_click=self.abrir_modal_compra)
+        contenedor_grid = ft.Container(
+            content=self.grid,
+            expand=4, 
+            padding=ft.padding.symmetric(horizontal=10),
+            bgcolor=ft.Colors.BLACK, 
+            image=ft.DecorationImage(src="beer_cartel.png", fit=ft.ImageFit.COVER, opacity=0.1)
+        )
+
+        # Chat
+        self.chat = TavernChat(
+            on_send_message=self.manejar_mensaje_chat,
+        )
 
         return [
             self.header,
-            ft.Container(expand=True, padding=10, content=self.grid)
+            contenedor_grid,
+            self.chat
         ]
 
-    # --- ACCIONES ---
+    # --- LÓGICA TEMPORAL DEL CHAT ---
+    def manejar_mensaje_chat(self, texto):
+        """Aquí conectaremos con la IA en el siguiente paso"""
+        print(f"Chat enviado: {texto}")
+        import time
+        time.sleep(0.5)
+        self.chat.agregar_mensaje("Sandyman", "Aún estoy limpiando jarras... ¡Dame un momento para conectarme a mi cerebro!", es_ia=True)
 
+    # --- ACCIONES ---
     def abrir_historial(self, e):
         dialog = HistoryDialog(self.current_client.id, self.page_ref)
         self.page_ref.overlay.append(dialog)
