@@ -11,7 +11,6 @@ class LoginView(ft.Container):
         
         self.expand = True
         self.bgcolor = ft.Colors.BLACK
-        # Fondo con opacidad para que resalte la UI
         self.image = ft.DecorationImage(src="beer_cartel.png", fit=ft.ImageFit.COVER, opacity=0.4)
         
         self.content = self._build_ui()
@@ -25,7 +24,7 @@ class LoginView(ft.Container):
         
         
         texto_seleccion = ft.Container(
-            width=800, # Que coincida con el ancho del grid
+            width=800, # para que coincida con el ancho del grid
             padding=ft.padding.symmetric(vertical=10),
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -48,12 +47,12 @@ class LoginView(ft.Container):
         # --- B) GRID DE CLIENTES ---
         grid_clientes = ft.GridView(
             expand=True, 
-            runs_count= 3,             # 3 columnas
+            runs_count= 3,             
             max_extent=250,           # Ancho max por carta
             child_aspect_ratio=0.85,  # Relación de aspecto
             spacing=15,               # Espacio horizontal entre cartas
             run_spacing=15,           # Espacio vertical entre cartas
-            padding=20,               # Relleno interno para que no toquen el borde
+            padding=20,               
         )
         
         for c in lista_clientes:
@@ -61,9 +60,9 @@ class LoginView(ft.Container):
         
         contenedor_clientes = ft.Container(
             content=grid_clientes,
-            border=ft.border.all(2, ft.Colors.AMBER_700), # Borde más fino pero intenso
+            border=ft.border.all(2, ft.Colors.AMBER_700),
             border_radius=15,
-            bgcolor=ft.Colors.with_opacity(0.85, ft.Colors.BLACK), # Fondo semi-opaco para leer bien
+            bgcolor=ft.Colors.with_opacity(0.85, ft.Colors.BLACK), 
             height=400,  
             width=800,
             padding=10, 
@@ -88,7 +87,7 @@ class LoginView(ft.Container):
         contenedor_titulo = ft.Container(
             content=ft.Container(
                 content=titulo_row,
-                border=ft.border.all(3, ft.Colors.AMBER), border_radius=100, padding=10,
+                border=ft.border.all(3, ft.Colors.AMBER), border_radius=20, padding=10,
                 scale=1.0, animate_scale=ft.Animation(300, ft.AnimationCurve.ELASTIC_OUT),
                 on_hover=self._animar_titulo
             ),
@@ -102,7 +101,7 @@ class LoginView(ft.Container):
             controls=[
                 ft.Row(alignment=ft.MainAxisAlignment.CENTER, controls=[contenedor_titulo]),
                 carousel,
-                ft.Container(height=10), # Espaciador
+                ft.Container(height=10), # espacio
                 texto_seleccion,
                 contenedor_clientes,
                 ft.Container(height=20) 
