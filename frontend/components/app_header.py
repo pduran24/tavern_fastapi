@@ -1,75 +1,84 @@
 import flet as ft
 
-class AppHeader(ft.Column):
-    def __init__(self):
+class AppHeader(ft.Container):
+    def __init__(self, client, on_logout, on_history_click, page_ref):
         super().__init__()
-        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
-        self.vertical_alignment = ft.CrossAxisAlignment.CENTER
-
-        self.etiqueta_tema = ft.Text("Ojo de Sauron", size = 12)
-
-        switch_tema = ft.Switch(value=True,on_change=self.cambiar_tema)
-
-
-        col_switch = ft.Column(
-            controls=[self.etiqueta_tema, switch_tema],
-            spacing=0, horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        self.client = client
+        self.on_logout = on_logout
+        self.on_history_click = on_history_click
+        self.page_ref = page_ref
+        
+        # Estética
+        self.padding = ft.padding.symmetric(horizontal=20, vertical=15)
+        self.bgcolor = ft.Colors.GREY_900
+        self.border = ft.border.only(bottom=ft.BorderSide(2, ft.Colors.AMBER_900))
+        self.shadow = ft.BoxShadow(blur_radius=15, color=ft.Colors.BLACK)
+        
+        # Elemento de Dinero
+        self.txt_money = ft.Text(
+            f"{self.client.cash} 💰", 
+            size=20, 
+            weight=ft.FontWeight.BOLD, 
+            color=ft.Colors.AMBER,
+            font_family="Cinzel"
         )
 
-        fila_inicio = ft.Row(
-            controls = [
-                ft.Container(width=150), # izq
-                ft.Container(width=300), # centro
-                ft.Container(content=col_switch, padding=ft.padding.only(right=20)) #derecha
-            ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-        )
-
-        titulo = ft.Text("🐉Existencias🐉", size=50, weight=ft.FontWeight.BOLD, scale=1.0)
-        contenedor_titulo = ft.Container (
-            on_hover=self.animar_titulo,
-            content=ft.Container(
-                content=titulo,
-                border=ft.border.all(3, ft.Colors.RED_400),
-                border_radius=100,
-                padding=10,
-                margin=ft.margin.only(top=10, bottom=25),
-                scale=1.0,
-                animate_scale=ft.Animation(
-                    250, ft.AnimationCurve.ELASTIC_OUT
-                ),
-                on_hover=self.animar_titulo
-            )
-        )
-
-        fila_titulo = ft.Row(
-            alignment=ft.MainAxisAlignment.CENTER,
+        self.content = ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
-                contenedor_titulo 
+                # IZQUIERDA: Info Jugador
+                ft.Row(controls=[
+                    ft.Container(
+                        padding=5,
+                        border=ft.border.all(2, ft.Colors.AMBER),
+                        border_radius=50,
+                        bgcolor=ft.Colors.BLACK,
+                        content=ft.Icon(ft.Icons.PERSON, color=ft.Colors.AMBER)
+                    ),
+                    ft.Column(spacing=0, alignment=ft.MainAxisAlignment.CENTER, controls=[
+                        ft.Text(self.client.name, weight="bold", size=16),
+                        ft.Text("Viajero", size=10, italic=True, color="grey")
+                    ])
+                ]),
+
+                # CENTRO: Título
+                ft.Row(visible=True, controls=[
+                    ft.Image(src="beer.png", width=60),
+                    ft.Text(" Existencias ", font_family="Cinzel", size=24, weight="bold", color=ft.Colors.WHITE),
+                    ft.Image(src="beer.png", width=60),
+
+                ]),
+
+                # DERECHA: Dinero - Historial - Salir
+                ft.Row(controls=[
+                    # 1. Dinero
+                    ft.Container(
+                        padding=ft.padding.symmetric(horizontal=15, vertical=8),
+                        bgcolor=ft.Colors.BLACK54, border_radius=10,
+                        border=ft.border.all(1, ft.Colors.AMBER_900),
+                        content=self.txt_money
+                    ),
+                    ft.Container(width=10),
+                    
+                    # 2. BOTÓN HISTORIAL 
+                    ft.IconButton(
+                        icon=ft.Icons.HISTORY_EDU, 
+                        tooltip="Libro de Cuentas", 
+                        icon_color=ft.Colors.AMBER_200, 
+                        on_click=self.on_history_click
+                    ),
+                    
+                    # 3. Botón Salir
+                    ft.IconButton(
+                        icon=ft.Icons.LOGOUT_ROUNDED, 
+                        icon_color=ft.Colors.RED_400, 
+                        tooltip="Salir", 
+                        on_click=self.on_logout
+                    )
+                ])
             ]
         )
 
-
-        self.controls = [
-            fila_inicio,
-            fila_titulo
-        ]
-
-
-    def cambiar_tema(self, e):
-        if e.control.value:
-            e.page.theme_mode = ft.ThemeMode.DARK
-            self.etiqueta_tema.value = "Ojo de Sauron"
-        else:
-            e.page.theme_mode = ft.ThemeMode.LIGHT
-            self.etiqueta_tema.value = "Luz de Valinor"
-        e.page.update()
-        self.etiqueta_tema.update()
-
-    def animar_titulo(self,e):
-        if e.data == "true":
-            e.control.scale = 1.05
-        else:
-            e.control.scale = 1.0
-        e.control.update()
-
+    def update_money(self, new_amount):
+        self.txt_money.value = f"{new_amount} 💰"
+        self.txt_money.update()
